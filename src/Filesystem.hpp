@@ -10,7 +10,7 @@ class Filesystem {
         bool loadFile(const std::string &filename);
 
     protected:
-        uint8_t* data = nullptr;
+        char* data = nullptr;
 };
 
 #endif
