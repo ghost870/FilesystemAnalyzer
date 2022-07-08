@@ -6,11 +6,14 @@
 
 class Filesystem {
     public:
+        Filesystem(const std::string &filename);
         virtual ~Filesystem();
-        bool loadFile(const std::string &filename);
 
     protected:
         char* data = nullptr;
+    
+    private:
+        bool loadFile(const std::string &filename);
 };
 
 #endif

@@ -1,6 +1,15 @@
+#include <stdexcept>
 #include <fstream>
 
 #include "Filesystem.hpp"
+
+Filesystem::Filesystem(const std::string &filename)
+{
+    if (!loadFile(filename))
+    {
+        throw std::runtime_error("Could not open file " + filename);
+    }
+}
 
 Filesystem::~Filesystem()
 {
