@@ -31,9 +31,9 @@ bool Filesystem::loadFile(const std::string &filename)
 
     delete [] data;
 
-    data = new char[dataSize];
+    data = new unsigned char[dataSize];
 
-    file.read(data, dataSize);
+    file.read((char*)data, dataSize);
 
     return true;
 }

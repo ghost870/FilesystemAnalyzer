@@ -11,7 +11,7 @@ class Filesystem {
         virtual ~Filesystem();
 
     protected:
-        char* data = nullptr;
+        unsigned char* data = nullptr;
         std::streamsize dataSize = 0;
     
     private:

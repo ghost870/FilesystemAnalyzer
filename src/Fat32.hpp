@@ -21,6 +21,8 @@ class Fat32 : public Filesystem {
         uint16_t reservedSectors;
         uint32_t fatSectorNumber;
         uint32_t rootCluster;
+
+        bool parseBootSector();
 };
 
 #endif
