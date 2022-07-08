@@ -15,6 +15,13 @@ class Fat32 : public Filesystem {
         uint32_t getFatSectorNumber() const { return fatSectorNumber; };
         uint32_t getRootCluster() const { return rootCluster; };
 
+        uint32_t getBytesPerCluster() const { return bytesPerCluster; };
+        uint32_t getFatOffset() const { return fatOffset; };
+        uint64_t getFatSize() const { return fatSize; };
+        uint64_t getFatCount() const { return fatCount; };
+        uint64_t getRootOffset() const { return rootOffset; };
+        uint32_t getRootSize() const { return rootSize; };
+
     private:
         uint16_t bytesPerSector;
         uint8_t sectorsPerCluster;
@@ -22,7 +29,15 @@ class Fat32 : public Filesystem {
         uint32_t fatSectorNumber;
         uint32_t rootCluster;
 
+        uint32_t bytesPerCluster;
+        uint32_t fatOffset;
+        uint64_t fatSize;
+        uint64_t fatCount;
+        uint64_t rootOffset;
+        uint32_t rootSize;
+
         bool parseBootSector();
+        void calculateParameters();
 };
 
 #endif
