@@ -25,15 +25,15 @@ bool Filesystem::loadFile(const std::string &filename)
 		return false;
 	}
 
-    std::streamsize filesize = file.tellg();
+    dataSize = file.tellg();
 
     file.seekg(0, std::ios::beg);
 
     delete [] data;
 
-    data = new char[filesize];
+    data = new char[dataSize];
 
-    file.read(data, filesize);
+    file.read(data, dataSize);
 
     return true;
 }
