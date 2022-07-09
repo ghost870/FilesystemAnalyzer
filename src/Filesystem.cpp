@@ -29,8 +29,6 @@ bool Filesystem::loadFile(const std::string &filename)
 
     file.seekg(0, std::ios::beg);
 
-    delete [] data;
-
     data = new unsigned char[dataSize];
 
     file.read((char*)data, dataSize);
