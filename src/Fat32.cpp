@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Fat32.hpp"
+#include "Helpers.h"
 
 Fat32::Fat32(const std::string &filename) : Filesystem(filename)
 {
@@ -22,11 +23,11 @@ bool Fat32::parseBootSector()
         return false;
     }
 
-    bytesPerSector = data[BS_BYTES_PER_SECTOR_OFFSET] | (data[BS_BYTES_PER_SECTOR_OFFSET + 1] << 8);
-    sectorsPerCluster = data[BS_SECTORS_PER_CLUSTER_OFFSET];
-    reservedSectors = data[BS_RESERVED_SECTORS_OFFSET] | (data[BS_RESERVED_SECTORS_OFFSET + 1] << 8);
-    fatSectorNumber = data[BS_FAT_SECTOR_NUMBER_OFFSET] | (data[BS_FAT_SECTOR_NUMBER_OFFSET + 1] << 8) | (data[BS_FAT_SECTOR_NUMBER_OFFSET + 2] << 16) | (data[BS_FAT_SECTOR_NUMBER_OFFSET + 3] << 24);
-    rootCluster = data[BS_ROOT_CLUSTER_OFFSET] | (data[BS_ROOT_CLUSTER_OFFSET + 1] << 8) | (data[BS_ROOT_CLUSTER_OFFSET + 2] << 16) | (data[BS_ROOT_CLUSTER_OFFSET + 3] << 24);
+    bytesPerSector = U16(data, BS_BYTES_PER_SECTOR_OFFSET);
+    sectorsPerCluster = U8(data, BS_SECTORS_PER_CLUSTER_OFFSET);
+    reservedSectors = U16(data, BS_RESERVED_SECTORS_OFFSET);
+    fatSectorNumber = U32(data, BS_FAT_SECTOR_NUMBER_OFFSET);
+    rootCluster = U32(data, BS_ROOT_CLUSTER_OFFSET);
 
     return true;
 }
@@ -57,7 +58,7 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
             return {};
         }
 
-        e = data[fatIndex] | (data[fatIndex + 1] << 8) | (data[fatIndex + 2] << 16) | (data[fatIndex + 3] << 24);
+        e = U32(data, fatIndex);
 
         iterationCounter++;
     }
@@ -80,9 +81,9 @@ int Fat32::listDirectoryEntries(uint32_t index) const
             std::cout << data[entryOffset + i];
         }
 
-        std::cout << (data[firstClusterOffset] | (data[firstClusterOffset + 1] << 8));
+        std::cout << U16(data, firstClusterOffset);
         std::cout << ":";
-        std::cout << (data[fileSizeOffset] | (data[fileSizeOffset + 1] << 8) | (data[fileSizeOffset + 2] << 16) | (data[fileSizeOffset + 3] << 24));
+        std::cout << U16(data, fileSizeOffset);
         std::cout << std::endl;
 
         entryOffset += DIRECTORY_ENTRY_SIZE;
