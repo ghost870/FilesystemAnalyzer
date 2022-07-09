@@ -27,6 +27,22 @@ class Fat32 : public Filesystem {
         int listDirectoryEntries(uint32_t index) const;
 
     private:
+        static inline int const BS_BYTES_PER_SECTOR_OFFSET = 0xB;
+        static inline int const BS_SECTORS_PER_CLUSTER_OFFSET = 0xD;
+        static inline int const BS_RESERVED_SECTORS_OFFSET = 0xE;
+        static inline int const BS_FAT_SECTOR_NUMBER_OFFSET = 0x24;
+        static inline int const BS_ROOT_CLUSTER_OFFSET = 0x2C;
+
+        static inline int const FAT_NUM_OF_TABLES = 2;
+        static inline int const FAT_ELEMENT_SIZE = 4;
+        static inline int const FAT_EOC = 0x0FFFFFFF;
+
+        static inline int const DIRECTORY_FIRST_ENTRY_OFFSET = 0x20;
+        static inline int const DIRECTORY_ENTRY_SIZE = 0x40;
+        static inline int const DIRECTORY_ENTRY_FIRST_CLUSTER_OFFSET = 0x1A;
+        static inline int const DIRECTORY_ENTRY_FILE_SIZE_OFFSET = 0x1C;
+        static inline int const DIRECTORY_ENTRY_NAME_LENGTH = 10;
+
         uint16_t bytesPerSector;
         uint8_t sectorsPerCluster;
         uint16_t reservedSectors;

@@ -17,16 +17,16 @@ Fat32::Fat32(const std::string &filename) : Filesystem(filename)
 
 bool Fat32::parseBootSector()
 {
-    if (dataSize <= 0x2F)
+    if (dataSize <= BS_ROOT_CLUSTER_OFFSET + 3)
     {
         return false;
     }
 
-    bytesPerSector = data[0xB] | (data[0xB + 1] << 8);
-    sectorsPerCluster = data[0xD];
-    reservedSectors = data[0xE] | (data[0xE + 1] << 8);
-    fatSectorNumber = data[0x24] | (data[0x24 + 1] << 8) | (data[0x24 + 2] << 16) | (data[0x24 + 3] << 24);
-    rootCluster = data[0x2C] | (data[0x2C + 1] << 8) | (data[0x2C + 2] << 16) | (data[0x2C + 3] << 24);
+    bytesPerSector = data[BS_BYTES_PER_SECTOR_OFFSET] | (data[BS_BYTES_PER_SECTOR_OFFSET + 1] << 8);
+    sectorsPerCluster = data[BS_SECTORS_PER_CLUSTER_OFFSET];
+    reservedSectors = data[BS_RESERVED_SECTORS_OFFSET] | (data[BS_RESERVED_SECTORS_OFFSET + 1] << 8);
+    fatSectorNumber = data[BS_FAT_SECTOR_NUMBER_OFFSET] | (data[BS_FAT_SECTOR_NUMBER_OFFSET + 1] << 8) | (data[BS_FAT_SECTOR_NUMBER_OFFSET + 2] << 16) | (data[BS_FAT_SECTOR_NUMBER_OFFSET + 3] << 24);
+    rootCluster = data[BS_ROOT_CLUSTER_OFFSET] | (data[BS_ROOT_CLUSTER_OFFSET + 1] << 8) | (data[BS_ROOT_CLUSTER_OFFSET + 2] << 16) | (data[BS_ROOT_CLUSTER_OFFSET + 3] << 24);
 
     return true;
 }
@@ -36,9 +36,8 @@ void Fat32::calculateParameters()
     bytesPerCluster = sectorsPerCluster * bytesPerSector;
     fatOffset = reservedSectors * bytesPerSector;
     fatSize = (uint64_t)fatSectorNumber * bytesPerSector;
-    fatCount = fatSize / 4;
-    rootOffset = fatOffset + fatSize * 2;
-    // This is not true. It can be more than one cluster.
+    fatCount = fatSize / FAT_ELEMENT_SIZE;
+    rootOffset = fatOffset + fatSize * FAT_NUM_OF_TABLES;
     rootSize = bytesPerCluster;
 }
 
@@ -48,10 +47,10 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
 
     uint32_t e = index;
     uint32_t iterationCounter = 0;
-    while (e != 0x0FFFFFFF && iterationCounter < UINT32_MAX)
+    while (e != FAT_EOC && iterationCounter < UINT32_MAX)
     {
         clusterIndexes.push_back(e + rootOffset / bytesPerCluster - 1);
-        uint64_t fatIndex = (uint64_t)fatOffset + e * 4;
+        uint64_t fatIndex = (uint64_t)fatOffset + e * FAT_ELEMENT_SIZE;
 
         if (dataSize <= fatIndex + 3)
         {
@@ -68,15 +67,15 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
 
 int Fat32::listDirectoryEntries(uint32_t index) const
 {
-    uint64_t entryOffset = (uint64_t)index * bytesPerCluster + 0x20;
+    uint64_t entryOffset = (uint64_t)index * bytesPerCluster + DIRECTORY_FIRST_ENTRY_OFFSET;
 
     uint32_t iterationCounter = 0;
-    while (dataSize > (entryOffset + 0x1F) && data[entryOffset] != 0 && iterationCounter < UINT32_MAX)
+    while (dataSize > (entryOffset + DIRECTORY_ENTRY_FILE_SIZE_OFFSET + 3) && data[entryOffset] != 0 && iterationCounter < UINT32_MAX)
     {
-        uint64_t firstClusterOffset = entryOffset + 0x1A;
-        uint64_t fileSizeOffset = entryOffset + 0x1C;
+        uint64_t firstClusterOffset = entryOffset + DIRECTORY_ENTRY_FIRST_CLUSTER_OFFSET;
+        uint64_t fileSizeOffset = entryOffset + DIRECTORY_ENTRY_FILE_SIZE_OFFSET;
 
-        for (int i = 0; i <= 10; i++)
+        for (int i = 0; i <= DIRECTORY_ENTRY_NAME_LENGTH; i++)
         {
             std::cout << data[entryOffset + i];
         }
@@ -86,7 +85,7 @@ int Fat32::listDirectoryEntries(uint32_t index) const
         std::cout << (data[fileSizeOffset] | (data[fileSizeOffset + 1] << 8) | (data[fileSizeOffset + 2] << 16) | (data[fileSizeOffset + 3] << 24));
         std::cout << std::endl;
 
-        entryOffset += 0x40;
+        entryOffset += DIRECTORY_ENTRY_SIZE;
 
         iterationCounter++;
     }
