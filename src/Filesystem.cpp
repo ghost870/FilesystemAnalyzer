@@ -21,9 +21,9 @@ bool Filesystem::loadFile(const std::string &filename)
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
 	
     if (!file)
-	{
-		return false;
-	}
+    {
+        return false;
+    }
 
     dataSize = file.tellg();
 
