@@ -66,9 +66,9 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
     return clusterIndexes;
 }
 
-int Fat32::listDirectoryEntries(uint32_t index) const
+void Fat32::listDirectoryEntries(uint32_t absoluteClusterNumber) const
 {
-    uint64_t entryOffset = (uint64_t)index * bytesPerCluster + DIRECTORY_FIRST_ENTRY_OFFSET;
+    uint64_t entryOffset = (uint64_t)absoluteClusterNumber * bytesPerCluster + DIRECTORY_FIRST_ENTRY_OFFSET;
 
     uint32_t iterationCounter = 0;
     while (dataSize > (entryOffset + DIRECTORY_ENTRY_FILE_SIZE_OFFSET + 3) && data[entryOffset] != 0 && iterationCounter < UINT32_MAX)
@@ -90,6 +90,4 @@ int Fat32::listDirectoryEntries(uint32_t index) const
 
         iterationCounter++;
     }
-
-    return 0;
 }

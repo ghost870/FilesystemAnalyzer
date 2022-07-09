@@ -24,7 +24,7 @@ class Fat32 : public Filesystem {
         uint32_t getRootSize() const { return rootSize; };
 
         std::vector<uint32_t> getClusterNumbers(uint32_t index) const;
-        int listDirectoryEntries(uint32_t index) const;
+        void listDirectoryEntries(uint32_t index) const;
 
     private:
         static inline int const BS_BYTES_PER_SECTOR_OFFSET = 0xB;
