@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
+#include <iostream>
 
 #include "Fat32.hpp"
 
@@ -63,4 +64,32 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
     }
 
     return clusterIndexes;
+}
+
+int Fat32::listDirectoryEntries(uint32_t index) const
+{
+    uint64_t entryOffset = (uint64_t)index * bytesPerCluster + 0x20;
+
+    uint32_t iterationCounter = 0;
+    while (dataSize > (entryOffset + 0x1F) && data[entryOffset] != 0 && iterationCounter < UINT32_MAX)
+    {
+        uint64_t firstClusterOffset = entryOffset + 0x1A;
+        uint64_t fileSizeOffset = entryOffset + 0x1C;
+
+        for (int i = 0; i <= 10; i++)
+        {
+            std::cout << data[entryOffset + i];
+        }
+
+        std::cout << (data[firstClusterOffset] | (data[firstClusterOffset + 1] << 8));
+        std::cout << ":";
+        std::cout << (data[fileSizeOffset] | (data[fileSizeOffset + 1] << 8) | (data[fileSizeOffset + 2] << 16) | (data[fileSizeOffset + 3] << 24));
+        std::cout << std::endl;
+
+        entryOffset += 0x40;
+
+        iterationCounter++;
+    }
+
+    return 0;
 }
