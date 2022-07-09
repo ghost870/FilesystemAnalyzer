@@ -2,6 +2,7 @@
 #define FAT32
 
 #include <cstdint>
+#include <vector>
 
 #include "Filesystem.hpp"
 
@@ -21,6 +22,8 @@ class Fat32 : public Filesystem {
         uint64_t getFatCount() const { return fatCount; };
         uint64_t getRootOffset() const { return rootOffset; };
         uint32_t getRootSize() const { return rootSize; };
+
+        std::vector<uint32_t> getClusterNumbers(uint32_t index) const;
 
     private:
         uint16_t bytesPerSector;

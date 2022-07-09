@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <vector>
 
 #include "Fat32.hpp"
 
@@ -14,7 +15,7 @@ Fat32::Fat32(const std::string &filename) : Filesystem(filename)
 
 bool Fat32::parseBootSector()
 {
-    if (dataSize < 0x2F)
+    if (dataSize <= 0x2F)
     {
         return false;
     }
@@ -37,4 +38,25 @@ void Fat32::calculateParameters()
     rootOffset = fatOffset + fatSize * 2;
     // This is not true. It can be more than one cluster.
     rootSize = bytesPerCluster;
+}
+
+std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
+{
+    std::vector<uint32_t> clusterIndexes;
+
+    uint32_t e = index;
+    while (e != 0x0FFFFFFF)
+    {
+        clusterIndexes.push_back(e + rootOffset / bytesPerCluster - 1);
+        uint64_t fatIndex = (uint64_t)fatOffset + e * 4;
+
+        if (dataSize <= fatIndex + 3)
+        {
+            return {};
+        }
+
+        e = data[fatIndex] | (data[fatIndex + 1] << 8) | (data[fatIndex + 2] << 16) | (data[fatIndex + 3] << 24);
+    }
+
+    return clusterIndexes;
 }
