@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
 
@@ -45,7 +46,8 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
     std::vector<uint32_t> clusterIndexes;
 
     uint32_t e = index;
-    while (e != 0x0FFFFFFF)
+    uint32_t iterationCounter = 0;
+    while (e != 0x0FFFFFFF && iterationCounter < UINT32_MAX)
     {
         clusterIndexes.push_back(e + rootOffset / bytesPerCluster - 1);
         uint64_t fatIndex = (uint64_t)fatOffset + e * 4;
@@ -56,6 +58,8 @@ std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
         }
 
         e = data[fatIndex] | (data[fatIndex + 1] << 8) | (data[fatIndex + 2] << 16) | (data[fatIndex + 3] << 24);
+
+        iterationCounter++;
     }
 
     return clusterIndexes;
