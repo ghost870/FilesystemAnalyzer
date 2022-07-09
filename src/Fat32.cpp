@@ -42,23 +42,24 @@ void Fat32::calculateParameters()
     rootSize = bytesPerCluster;
 }
 
-std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t index) const
+std::vector<uint32_t> Fat32::getClusterNumbers(uint32_t relativeFirstClusterNumber) const
 {
     std::vector<uint32_t> clusterIndexes;
 
-    uint32_t e = index;
+    uint32_t actualClusterNumber = relativeFirstClusterNumber;
     uint32_t iterationCounter = 0;
-    while (e != FAT_EOC && iterationCounter < UINT32_MAX)
+    while (actualClusterNumber != FAT_EOC && iterationCounter < UINT32_MAX)
     {
-        clusterIndexes.push_back(e + rootOffset / bytesPerCluster - 1);
-        uint64_t fatIndex = (uint64_t)fatOffset + e * FAT_ELEMENT_SIZE;
+        clusterIndexes.push_back(actualClusterNumber + rootOffset / bytesPerCluster - 1);
+        
+        uint64_t fatIndex = (uint64_t)fatOffset + actualClusterNumber * FAT_ELEMENT_SIZE;
 
         if (dataSize <= fatIndex + 3)
         {
-            return {};
+            break;
         }
 
-        e = U32(data, fatIndex);
+        actualClusterNumber = U32(data, fatIndex);
 
         iterationCounter++;
     }
